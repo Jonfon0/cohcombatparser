@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="ERROR" name="example-config">
+    <Properties>
+        <Property name="LOG_DIR">logs</Property>
+        <Property name="ARCHIVE">${LOG_DIR}/archive</Property>
+        <Property name="PATTERN">%highlight{[%-5level] [%d] [%t] [%c{1}] %m%n}</Property>
+        <Property name="PATTERN_COLOR">%highlight{[%d] [%-5p] [%t] %C{1} (%F:%L) - %m%n}</Property>
+        <Property name="JOBID">${sys:job.id}</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="${PATTERN}"/>
+        </Console>
+
+        <RollingFile name="fileWriter"
+                     fileName="${LOG_DIR}/out.log"
+                     filePattern="${ARCHIVE}/%d{yyyy-MM-dd}/out.log.gz">
+            <PatternLayout pattern="${PATTERN}"/>
+            <TimeBasedTriggeringPolicy/>
+        </RollingFile>
+    </Appenders>
+    
+    <Loggers>
+        <Root level="DEBUG">
+            <AppenderRef ref="fileWriter"/>
+        </Root>
+    </Loggers>
+</Configuration>
