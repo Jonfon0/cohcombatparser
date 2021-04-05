@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.coh.carnifax.combat.data.IsHidable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class BasePower {
+public class BasePower extends IsHidable {
 
 	private String name;
 	private Timestamp timestamp;

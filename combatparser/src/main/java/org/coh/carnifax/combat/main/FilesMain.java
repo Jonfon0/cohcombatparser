@@ -10,6 +10,7 @@ import org.coh.carnifax.combat.files.FileParseException;
 import org.coh.carnifax.combat.files.InitialFileParser;
 import org.coh.carnifax.combat.parser.CombatParseException;
 import org.coh.carnifax.combat.parser.CombatParser;
+import org.coh.carnifax.combat.parser.MasterParser;
 import org.apache.logging.log4j.LogManager;
 
 public class FilesMain {
@@ -34,22 +35,9 @@ public class FilesMain {
 			throw new RuntimeException("File " + f.getAbsolutePath() + " does not exist");
 		}
 		
-		
 		try {
-			InitialFileParser p = new InitialFileParser();
-			
-			String uuid = UUID.randomUUID().toString();
-			FileDescriptor d = p.parse(f, uuid );
-			
-			for( File combat : d.getCombat().values() ) {
-				CombatParser cp = new CombatParser();
-				BaseChar cha = cp.parse( uuid, p.getInputFolder(), combat );
-				BaseCharOutput bco = new BaseCharOutput();
-				bco.output( p.getInputFolder(), cha );
-			}
-			
-			d.destroy();
-			
+			MasterParser p = new MasterParser();
+			p.parseAll( f );
 		} catch (FileParseException | CombatParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

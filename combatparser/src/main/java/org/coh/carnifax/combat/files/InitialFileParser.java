@@ -226,7 +226,7 @@ public class InitialFileParser implements Closeable{
 	 * @throws IOException
 	 */
 	private void createCombat( String name ) throws IOException {
-		File f = new File( inputFolder,  CombatDefs.COMBAT + name + ".txt" );
+		File f = new File( inputFolder,  (CombatDefs.COMBAT + name + ".txt").replaceAll( "[^a-zA-Z0-9._-]", "_") );
 		
 		this.curCombat = new PrintStream(f);
 		this.combat.put( name, curCombat );

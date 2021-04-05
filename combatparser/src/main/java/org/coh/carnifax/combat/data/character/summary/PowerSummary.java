@@ -11,4 +11,7 @@ public interface PowerSummary {
 	public void add( String name, double value, double total );
 	public double getTotal();
 	public double getAverage();
+	
+	public void setHidable(boolean h);
+	public boolean isHidable();
 }

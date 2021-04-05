@@ -14,7 +14,7 @@ public class CombatDefs {
 	public static final String PATTERN_HIT_AUTO	 	= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) HIT (.+)! Your (.+) power is autohit.";
 	public static final String PATTERN_MISS 	 	= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) MISSED (.+)!! Your (.+) power had a (.+)% chance to hit, you rolled a (.+).";
 	public static final String PATTERN_DAMAGE 	 	= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) You hit (.+) with your (.+) for ([0-9.]+) points of (.+) damage.";
-	public static final String PATTERN_DAM_PROC		= ".+: Chance for .+";
+	public static final String PATTERN_DAM_PROC		= "(.+: Chance for .+)|(.+/Chance for .+)";
 	public static final String PATTERN_PSEUDODAM	= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) (.+?):  You hit (.+) with your (.+) for (.+) points of (.+) damage.$";
 	public static final String PATTERN_HEAL			= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) You heal (.+) with (.+) for (.+) health points.";
 	public static final String PATTERN_HEAL_OVER_TIME =  "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) You are healed by your (.+) for (.+) health points over time.";

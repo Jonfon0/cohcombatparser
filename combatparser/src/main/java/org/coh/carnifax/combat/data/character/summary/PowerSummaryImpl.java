@@ -3,21 +3,23 @@ package org.coh.carnifax.combat.data.character.summary;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.coh.carnifax.combat.data.IsHidable;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({ "total", "average", "summary" })
-public class PowerSummaryImpl implements PowerSummary {
+public class PowerSummaryImpl extends IsHidable implements PowerSummary {
 
-	private Map<String, SummaryEntry> entries;
+	private Map<String, SummaryEntry> summary;
 	private double total;
-
+	
 	public PowerSummaryImpl() {
-		this.entries = new TreeMap<String, SummaryEntry>();
+		this.summary = new TreeMap<String, SummaryEntry>();
 	}
 	
 	@Override
 	public Map<String, SummaryEntry> getSummary() {
-		return this.entries;
+		return this.summary;
 	}
 
 	@Override
@@ -30,7 +32,7 @@ public class PowerSummaryImpl implements PowerSummary {
 		
 		this.total += value;
 		
-		this.entries.put( name, e );
+		this.summary.put( name, e );
 		
 	}
 
@@ -41,11 +43,11 @@ public class PowerSummaryImpl implements PowerSummary {
 
 	@Override
 	public double getAverage() {
-		if(this.entries.size() == 0){
+		if(this.summary.size() == 0){
 			return 0;
 		}
-		return total / this.entries.size();
-	} 
-	
+		return total / this.summary.size();
+	}
+
 	
 }

@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import org.coh.carnifax.combat.data.character.summary.PowerSummaryImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.coh.carnifax.combat.data.character.summary.DamagePowerSummary;
 import org.coh.carnifax.combat.data.character.summary.PowerSummary;
 import org.coh.carnifax.combat.data.powers.BasePower;
 import org.coh.carnifax.combat.data.powers.BasePowerData;
@@ -37,6 +38,7 @@ public class BaseChar {
 	private PowerSummary dps;
 	
 	public BaseChar( String uuid ){
+		this.uuid = uuid;
 		this.powers = new TreeMap<String, BasePower>();
 		this.data   = new BasePowerData();
 		this.defeats = new TreeMap<>();
@@ -151,7 +153,8 @@ public class BaseChar {
 		
 		this.damage = new PowerSummaryImpl();
 		this.heal   = new PowerSummaryImpl();
-		this.dps 	= new PowerSummaryImpl();
+		this.dps 	= new DamagePowerSummary();
+		this.dps.setHidable(true);
 		
 		double total 		= this.data.getDamage();
 		double healTotal	= this.data.getHeal();
