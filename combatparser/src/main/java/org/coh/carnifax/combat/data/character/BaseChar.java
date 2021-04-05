@@ -18,7 +18,7 @@ import org.coh.carnifax.combat.parser.CombatParser;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({ "name", "uuid", "startDate", "endDate", "start", "end", "duration", "combatStartDate", "combatEndDate",  "combatStart", "combatEnd", "combatDuration", 
-	"totalXP", "totalInf", "data", "damage", "heal", "powers", "dps" })
+	"totalXp", "xpPerCombatSecond", "totalInf", "infPerCombatSecond", "damagePerCombatSecond", "data", "damage", "heal", "powers", "dps" })
 
 public class BaseChar {
 	private final static Logger logger = LogManager.getLogger( BaseChar.class );
@@ -32,11 +32,11 @@ public class BaseChar {
 	
 	private Timestamp start;
 	private Timestamp end;
-	private long 	  duration;
+	private long 	  duration=1;
 	
 	private Timestamp combatStart;
 	private Timestamp combatEnd;
-	private long 	  combatDuration;
+	private long 	  combatDuration=1;
 	
 	private long totalXP;
 	private long totalInf;
@@ -177,16 +177,28 @@ public class BaseChar {
 	}
 	
 
-	public long getTotalXP() {
+	public long getTotalXp() {
 		return totalXP;
 	}
 
-	public void setTotalXP(long totalXP) {
+	public void setTotalXp(long totalXP) {
 		this.totalXP = totalXP;
 	}
 
 	public long getTotalInf() {
 		return totalInf;
+	}
+	
+	public long getXpPerCombatSecond() {
+		return this.totalXP / combatDuration;
+	}
+
+	public long getInfPerCombatSecond() {
+		return this.totalInf / combatDuration;
+	}
+
+	public long getDamagePerCombatSecond() {
+		return (long)this.data.getDamageTotal() / combatDuration;
 	}
 
 	public void setTotalInf(long totalInf) {
@@ -208,6 +220,18 @@ public class BaseChar {
 		this.powers = powers;
 	}
 
+	public long getDuration() {
+		return duration;
+	}
+
+	public void setDuration(long duration) {
+		this.duration = duration;
+	}
+	
+	public void updateDuration() {
+		duration = ( end.getTime() - start.getTime() ) / 1000; 
+	}
+	
 	public BasePower getPower( Timestamp t, String name ) {
 		if( this.start == null ) {
 			this.start = t;
@@ -242,11 +266,11 @@ public class BaseChar {
 		this.dps 	= new DamagePowerSummary();
 		this.dps.setHidable(true);
 		
-		double total 		= this.data.getDamage();
+		double total 		= this.data.getDamageTotal();
 		double healTotal	= this.data.getHeal();
 		
 		for( BasePower p : this.powers.values() ) {
-			damage.add(p.getName(), p.getData().getDamage(), total);
+			damage.add(p.getName(), p.getData().getDamageTotal(), total);
 			heal.add(p.getName(), p.getData().getHeal(), healTotal );
 		}
 		
@@ -267,8 +291,8 @@ public class BaseChar {
 			for( BasePower p : this.powers.values() ) {
 				for( PowerInstance pi : p.getInstances() ) {
 					if(  pi.getTimeMillis().getTime() / 1000 == i) {
-						total += pi.getData().getDamage();
-						if( pi.getData().getDamage() != 0 ) {
+						total += pi.getData().getDamageTotal();
+						if( pi.getData().getDamageTotal() != 0 ) {
 							t = pi.getTimeMillis();
 						}
 					}
@@ -277,8 +301,8 @@ public class BaseChar {
 				for( BasePower sp : p.getSubPowers().values() ) {
 					for( PowerInstance pi : sp.getInstances() ) {
 						if(  pi.getTimeMillis().getTime() / 1000 == i) {
-							total += pi.getData().getDamage();
-							if( pi.getData().getDamage() != 0 ) {
+							total += pi.getData().getDamageTotal();
+							if( pi.getData().getDamageTotal() != 0 ) {
 								t = pi.getTimeMillis();
 							}
 						}
@@ -295,7 +319,7 @@ public class BaseChar {
 				this.combatEnd = t;
 			}
 			
-			this.dps.add( "" + (i*1000), (total / counter), this.data.getDamage());
+			this.dps.add( "" + (i*1000), (total / counter), this.data.getDamageTotal());
 			
 		}
 		if( this.combatStart != null && this.combatEnd != null ) {
@@ -304,16 +328,5 @@ public class BaseChar {
 		
 	}
 
-	public long getDuration() {
-		return duration;
-	}
-
-	public void setDuration(long duration) {
-		this.duration = duration;
-	}
-	
-	public void updateDuration() {
-		duration = ( end.getTime() - start.getTime() ) / 1000; 
-	}
 	
 }

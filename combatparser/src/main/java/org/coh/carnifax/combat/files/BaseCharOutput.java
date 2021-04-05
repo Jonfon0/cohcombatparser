@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.coh.carnifax.combat.data.CombatDefs;
 import org.coh.carnifax.combat.data.character.BaseChar;
+import org.coh.carnifax.combat.data.character.BaseCharMixIn;
 import org.coh.carnifax.combat.data.character.summary.DamagePowerSummary;
 import org.coh.carnifax.combat.data.character.summary.DamagePowerSummaryMixIn;
 import org.coh.carnifax.combat.data.powers.BasePower;
@@ -47,6 +48,7 @@ public class BaseCharOutput {
 		ObjectMapper mapper = new ObjectMapper();
 		
 		if( concise ) {
+			mapper.addMixIn(BaseChar.class, BaseCharMixIn.class );
 			mapper.addMixIn(BasePower.class, BasePowerMixIn.class );
 			mapper.addMixIn(DamagePowerSummary.class, DamagePowerSummaryMixIn.class );
 		}

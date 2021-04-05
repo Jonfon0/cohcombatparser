@@ -31,14 +31,15 @@ public class CombatParser {
 	private Pattern hitAuto;
 	private Pattern miss;
 	private Pattern damage;
+	private Pattern damageOverTime;
 	private Pattern pseudoDamage;
+	private Pattern damageProc;
 	private Pattern healOverTime;
 	private Pattern heal;
 	private Pattern pseudoHeal;
 	private Pattern defeatsSelf;
 	private Pattern defeatsOther;
 	private Pattern date;
-	private Pattern damageProc;
 	private Pattern xpInf;
 	
 	private SimpleDateFormat df;
@@ -53,6 +54,7 @@ public class CombatParser {
 		hitAuto = Pattern.compile( CombatDefs.PATTERN_HIT_AUTO );
 		miss= Pattern.compile( CombatDefs.PATTERN_MISS );
 		damage = Pattern.compile( CombatDefs.PATTERN_DAMAGE );
+		damageOverTime = Pattern.compile( CombatDefs.PATTERN_DAMAGE_OVER_TIME );
 		damageProc = Pattern.compile( CombatDefs.PATTERN_DAM_PROC );
 		pseudoDamage = Pattern.compile( CombatDefs.PATTERN_PSEUDODAM );
 		healOverTime = Pattern.compile( CombatDefs.PATTERN_HEAL_OVER_TIME );
@@ -123,6 +125,7 @@ public class CombatParser {
 			Matcher hitAutoM		= this.hitAuto.matcher( line );
 			Matcher missM 		= this.miss.matcher( line );
 			Matcher damM 		= this.damage.matcher( line );
+			Matcher damOverTimeM= this.damageOverTime.matcher( line );
 			Matcher damProcM	= this.damageProc.matcher( line );
 			Matcher pseudoDamM 	= this.pseudoDamage.matcher( line );
 			Matcher healOverTimeM= this.healOverTime.matcher( line );
@@ -134,6 +137,9 @@ public class CombatParser {
 			
 			Timestamp t 	= null;
 			
+			if( damOverTimeM.matches() ) {
+				t = this.parseDamageOverTime(damOverTimeM, damProcM);
+			}
 			if( damM.matches() ) {
 				t = this.parseDamage(damM, damProcM);
 			}
@@ -322,7 +328,6 @@ public class CombatParser {
 	}
 
 	private Timestamp parseDamage( Matcher damM, Matcher damProcM ) throws ParseException {
-		logger.debug( "Parsing with " + damM.pattern().toString() );
 		
 		Timestamp t 	= this.parseTime( damM.group(1).trim() );
 		String enemy 	= damM.group(2).trim();
@@ -349,6 +354,37 @@ public class CombatParser {
 		p.getData().addDamage(type, damage);
 		i.getData().addDamage(type, damage);
 		ch.getData().addDamage( type, damage );
+		
+		return t;
+	}
+	
+	private Timestamp parseDamageOverTime( Matcher damOverTimeM, Matcher damProcM ) throws ParseException {
+		
+		Timestamp t 	= this.parseTime( damOverTimeM.group(1).trim() );
+		String enemy 	= damOverTimeM.group(2).trim();
+		String power 	= damOverTimeM.group(3).trim(); 
+		
+		double damage	= Double.parseDouble( damOverTimeM.group(4).trim().replace(",", "")  );
+		String type		= damOverTimeM.group(5).trim();
+		
+		BasePower p 	= ch.getPower( t, power );
+		
+		PowerInstance i = null; 
+		if( damProcM.matches()) {
+			i = new PowerInstance();
+			i.setDidHit(true);
+			i.getData().addHit();
+			i.setTimestamp(t);
+			
+			p.addInstance(i);
+			p.getData().addHit();
+		}
+		
+		i = p.getLastInstance(t);
+		
+		p.getData().addDamageOverTime(type, damage);
+		i.getData().addDamageOverTime(type, damage);
+		ch.getData().addDamageOverTime( type, damage );
 		
 		return t;
 	}
