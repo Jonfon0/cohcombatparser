@@ -17,7 +17,7 @@ import org.coh.carnifax.combat.parser.CombatParser;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({ "name", "uuid", "startDate", "endDate", "startMillis", "endMillis", "data", "damage", "heal", "powers", "dps" })
+@JsonPropertyOrder({ "name", "uuid", "startDate", "endDate", "startMillis", "endMillis", "duration", "data", "damage", "heal", "powers", "dps" })
 
 public class BaseChar {
 	private final static Logger logger = LogManager.getLogger( BaseChar.class );
@@ -31,6 +31,7 @@ public class BaseChar {
 	
 	private Timestamp start;
 	private Timestamp end;
+	private long 	  duration;
 	
 	private BasePowerData data;
 	private PowerSummary damage;
@@ -106,11 +107,14 @@ public class BaseChar {
 
 	public void setEnd(Timestamp end) {
 		this.end = end;
+		updateDuration();
 	} 
 
 	public void setEnd(long end) {
 		this.end = new Timestamp(end);
+		updateDuration();
 	} 
+	
 
 	public Timestamp getEndMillis() {
 		return end;
@@ -198,6 +202,18 @@ public class BaseChar {
 			
 		}
 		
+	}
+
+	public long getDuration() {
+		return duration;
+	}
+
+	public void setDuration(long duration) {
+		this.duration = duration;
+	}
+	
+	public void updateDuration() {
+		duration = ( end.getTime() - start.getTime() ) / 1000; 
 	}
 	
 }
