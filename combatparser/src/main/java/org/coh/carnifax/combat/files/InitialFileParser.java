@@ -170,7 +170,7 @@ public class InitialFileParser implements Closeable{
 		this.current.setName(name);
 		this.current.setStart(start);
 		
-		this.createCombat( name + "_" + start );
+		this.createCombat( name,  start );
 		
 		logger.debug("Started a new session for " + name + " at " + new Date(start) );
 		this.isRecording = true;
@@ -225,8 +225,8 @@ public class InitialFileParser implements Closeable{
 	 * @param name
 	 * @throws IOException
 	 */
-	private void createCombat( String name ) throws IOException {
-		File f = new File( inputFolder,  (CombatDefs.COMBAT + name + ".txt").replaceAll( "[^a-zA-Z0-9._-]", "_") );
+	private void createCombat( String name, long t ) throws IOException {
+		File f = new File( inputFolder,  (CombatDefs.COMBAT + name + "_" + new Timestamp(t).toString() + "_" + t + ".txt").replaceAll( "[^a-zA-Z0-9._-]", "_") );
 		
 		this.curCombat = new PrintStream(f);
 		this.combat.put( name, curCombat );

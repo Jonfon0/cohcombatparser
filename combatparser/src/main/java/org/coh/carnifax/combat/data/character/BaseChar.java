@@ -17,7 +17,8 @@ import org.coh.carnifax.combat.parser.CombatParser;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({ "name", "uuid", "startDate", "endDate", "startMillis", "endMillis", "duration", "data", "damage", "heal", "powers", "dps" })
+@JsonPropertyOrder({ "name", "uuid", "startDate", "endDate", "start", "end", "duration", "combatStartDate", "combatEndDate",  "combatStart", "combatEnd", "combatDuration", 
+	"totalXP", "totalInf", "data", "damage", "heal", "powers", "dps" })
 
 public class BaseChar {
 	private final static Logger logger = LogManager.getLogger( BaseChar.class );
@@ -33,10 +34,20 @@ public class BaseChar {
 	private Timestamp end;
 	private long 	  duration;
 	
+	private Timestamp combatStart;
+	private Timestamp combatEnd;
+	private long 	  combatDuration;
+	
+	private long totalXP;
+	private long totalInf;
+	
 	private BasePowerData data;
 	private PowerSummary damage;
 	private PowerSummary heal;
 	private PowerSummary dps;
+	private PowerSummary inf;
+	private PowerSummary xp;
+	private Map<Timestamp, String> drops;
 	
 	public BaseChar( String uuid ){
 		this.uuid = uuid;
@@ -81,23 +92,19 @@ public class BaseChar {
 		return this.defeats;
 	}
 	
+	public long getCombatDuration() {
+		return combatDuration;
+	}
+
+	public void setCombatDuration(long combatDuration) {
+		this.combatDuration = combatDuration;
+	}
 	
-	public Map<String, BasePower> getPowers() {
-		return powers;
-	}
-	public void setPowers(Map<String, BasePower> powers) {
-		this.powers = powers;
-	}
-	public Timestamp getStartMillis() {
+	
+	public Timestamp getStart() {
 		return start;
 	}
-	public String getStartDate() {
-		if( this.start == null) {
-			return "";
-		}
-		
-		return new Date( start.getTime() ).toString();
-	}
+	
 	public void setStart(Timestamp start) {
 		this.start = start;
 	}
@@ -105,27 +112,102 @@ public class BaseChar {
 		this.start = new Timestamp(start);
 	}
 
-	public void setEnd(Timestamp end) {
-		this.end = end;
-		updateDuration();
-	} 
-
-	public void setEnd(long end) {
-		this.end = new Timestamp(end);
-		updateDuration();
-	} 
-	
-
-	public Timestamp getEndMillis() {
+	public Timestamp getEnd() {
 		return end;
 	}
-	public String getEndDate(){
+
+	public void setEnd(Timestamp end) {
+		this.end = end;
+	}
+	public void setEnd(long end) {
+		this.end = new Timestamp(end);
+	}
+
+	public Timestamp getCombatStart() {
+		return combatStart;
+	}
+
+	public void setCombatStart(Timestamp combatStartDate) {
+		this.combatStart = combatStartDate;
+	}
+	public void setCombatStart(long combatStartDate) {
+		this.combatStart = new Timestamp( combatStartDate );
+	}
+
+	public Timestamp getCombatEnd() {
+		return combatEnd;
+	}
+
+	public void setCombatEnd(Timestamp combatEndDate) {
+		this.combatEnd= combatEndDate;
+	}
+	public void setCombatEnd(long combatEndDate) {
+		this.combatEnd= new Timestamp(combatEndDate);
+	}
+
+	public String getStartDate() {
+		if( this.start == null) {
+			return "";
+		}
+		
+		return new Date( start.getTime() ).toString();
+	}
+	public String getEndDate() {
 		if( this.end == null) {
 			return "";
 		}
 		
 		return new Date( end.getTime() ).toString();
 	}
+	
+	public String getCombatStartDate() {
+		if( this.combatStart == null) {
+			return "";
+		}
+		
+		return new Date( combatStart.getTime() ).toString();
+	}
+
+	public String getCombatEndDate() {
+		if( this.combatEnd == null) {
+			return "";
+		}
+		
+		return new Date( combatEnd.getTime() ).toString();
+	}
+	
+
+	public long getTotalXP() {
+		return totalXP;
+	}
+
+	public void setTotalXP(long totalXP) {
+		this.totalXP = totalXP;
+	}
+
+	public long getTotalInf() {
+		return totalInf;
+	}
+
+	public void setTotalInf(long totalInf) {
+		this.totalInf = totalInf;
+	}
+
+	public void addXp( Timestamp t, long xp ) {
+		this.totalXP = totalXP + xp;
+	}
+	
+	public void addInf( Timestamp t, long inf ) {
+		this.totalInf = totalInf + inf;
+	}
+	
+	public Map<String, BasePower> getPowers() {
+		return powers;
+	}
+	public void setPowers(Map<String, BasePower> powers) {
+		this.powers = powers;
+	}
+
 	public BasePower getPower( Timestamp t, String name ) {
 		if( this.start == null ) {
 			this.start = t;
@@ -181,10 +263,14 @@ public class BaseChar {
 		for( long i = start.getTime() / 1000; i <= end.getTime() / 1000; i++ ) {
 			counter++;
 			
+			Timestamp t = null;
 			for( BasePower p : this.powers.values() ) {
 				for( PowerInstance pi : p.getInstances() ) {
 					if(  pi.getTimeMillis().getTime() / 1000 == i) {
 						total += pi.getData().getDamage();
+						if( pi.getData().getDamage() != 0 ) {
+							t = pi.getTimeMillis();
+						}
 					}
 				}
 				
@@ -192,14 +278,28 @@ public class BaseChar {
 					for( PowerInstance pi : sp.getInstances() ) {
 						if(  pi.getTimeMillis().getTime() / 1000 == i) {
 							total += pi.getData().getDamage();
+							if( pi.getData().getDamage() != 0 ) {
+								t = pi.getTimeMillis();
+							}
 						}
 					}
 		
 				}
 			}
 			
+			if( this.combatStart == null && t != null ) {
+				this.combatStart = t;
+			}
+			
+			if( t != null ) {
+				this.combatEnd = t;
+			}
+			
 			this.dps.add( "" + (i*1000), (total / counter), this.data.getDamage());
 			
+		}
+		if( this.combatStart != null && this.combatEnd != null ) {
+			this.combatDuration = (this.combatEnd.getTime() - this.combatStart.getTime()) / 1000;
 		}
 		
 	}
