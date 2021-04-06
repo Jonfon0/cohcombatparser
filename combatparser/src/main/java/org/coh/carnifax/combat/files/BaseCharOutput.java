@@ -27,7 +27,7 @@ public class BaseCharOutput {
 
 	public File output( File parentDir, BaseChar c ) throws FileParseException {
 		
-		String name = (CombatDefs.SUMMARY + c.getName() + "_" + c.getStart().toString() + ".json").replaceAll( "[^a-zA-Z0-9._-]", "_");
+		String name = (CombatDefs.SUMMARY + c.getStart().toString() + "_" + c.getName() + ".json").replaceAll( "[^a-zA-Z0-9._ -]", "_");
 		
 		File combat = new File( parentDir, name );
 		

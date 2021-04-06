@@ -7,7 +7,6 @@ import org.coh.carnifax.combat.data.character.BaseChar;
 import org.coh.carnifax.combat.files.BaseCharOutput;
 import org.coh.carnifax.combat.files.FileDescriptor;
 import org.coh.carnifax.combat.files.FileParseException;
-import org.coh.carnifax.combat.files.InitialFileParser;
 
 public class MasterParser {
 

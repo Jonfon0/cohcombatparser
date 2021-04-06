@@ -6,10 +6,11 @@ import java.util.TreeMap;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 public class BasePowerData {
-	@JsonPropertyOrder({ "hits", "misses", "damageTotal", "damage", "damageOverTime", "damageTypes", "heal", "endHeal", "endDamage"})
+	@JsonPropertyOrder({ "activations", "hits", "misses", "damageTotal", "damage", "damageOverTime", "averageDamage", "damageTypes", "heal", "endHeal", "endDamage"})
 
 	private double damage;
 	private double damageOverTime;
+	
 	
 	private Map<String, Double> damageTypes;
 	
@@ -19,7 +20,7 @@ public class BasePowerData {
 	
 	private int hits;
 	private int misses;
-
+	
 	public BasePowerData() {
 		damageTypes = new TreeMap<String, Double>();
 	}
@@ -38,6 +39,14 @@ public class BasePowerData {
 
 	public double getDamageOverTime() {
 		return damageOverTime;
+	}
+	
+	public double getAverageDamage(){
+		return this.getActivations() == 0 ? 0.00 : this.getDamageTotal() / this.getActivations(); 
+	}
+	
+	public int getActivations(){
+		return hits + misses;
 	}
 
 	public void setDamageOverTime(double damageOverTime) {

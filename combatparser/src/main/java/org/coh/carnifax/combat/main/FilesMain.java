@@ -7,9 +7,9 @@ import org.coh.carnifax.combat.data.character.BaseChar;
 import org.coh.carnifax.combat.files.BaseCharOutput;
 import org.coh.carnifax.combat.files.FileDescriptor;
 import org.coh.carnifax.combat.files.FileParseException;
-import org.coh.carnifax.combat.files.InitialFileParser;
 import org.coh.carnifax.combat.parser.CombatParseException;
 import org.coh.carnifax.combat.parser.CombatParser;
+import org.coh.carnifax.combat.parser.InitialFileParser;
 import org.coh.carnifax.combat.parser.MasterParser;
 import org.apache.logging.log4j.LogManager;
 
