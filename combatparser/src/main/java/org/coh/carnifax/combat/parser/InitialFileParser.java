@@ -140,12 +140,12 @@ public class InitialFileParser implements Closeable{
 			m = startPattern.matcher( s );
 			
 			if( m.matches() ) {
-				startSession( m.group(2), parseTime( m.group( 1 ) ) );
+				checkStartSession( m.group(2), m.group(3), parseTime( m.group( 1 ) ) );
 			}
 			else  {
 				m = endPattern.matcher( s );
 				if( m.matches() ) {
-					endSession( parseTime( m.group( 1 ) ) );
+					checkEndSession( m.group(2), m.group(3), parseTime( m.group( 1 ) ) );
 				}
 			}
 			
@@ -169,6 +169,24 @@ public class InitialFileParser implements Closeable{
 			this.curCombat.println( s );
 		}
 		
+	}
+
+	private void checkStartSession( String name, String potentialName, long start ) throws IOException {
+		String normalName 		= name.replaceAll( "[^0-9a-zA-Z ]" , "").trim().toLowerCase();
+		String normalPotential 	= potentialName.replaceAll( "[^0-9a-zA-Z ]" , "").trim().toLowerCase();
+		
+		if( normalName.equals( normalPotential ) ) {
+			startSession(name, start);
+		}
+	}
+	
+	private void checkEndSession( String name, String potentialName, long start ) throws IOException {
+		String normalName 		= name.replaceAll( "[^0-9a-zA-Z ]" , "").trim().toLowerCase();
+		String normalPotential 	= potentialName.replaceAll( "[^0-9a-zA-Z ]" , "").trim().toLowerCase();
+		
+		if( normalName.equals( normalPotential ) ) {
+			endSession(start);
+		}
 	}
 	
 	private void startSession( String name, long start ) throws IOException {

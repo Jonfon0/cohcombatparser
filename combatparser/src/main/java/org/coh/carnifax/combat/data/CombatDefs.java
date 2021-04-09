@@ -6,8 +6,8 @@ public class CombatDefs {
 
 	public static final String PATTERN_GLOBAL		= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) \\[(.+?)](.+?):(.+)";
 	
-	public static final String PATTERN_STARTPARSE	= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) \\[Local\\] (.+): STARTPARSE";
-	public static final String PATTERN_ENDPARSE		= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) \\[Local\\] (.+): ENDPARSE";
+	public static final String PATTERN_STARTPARSE	= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) \\[Local\\] (.+): STARTPARSE (.+)";
+	public static final String PATTERN_ENDPARSE		= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) \\[Local\\] (.+): ENDPARSE (.+)";
 	public static final String PATTERN_WELCOME		= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) Welcome to City of Heroes, (.+)!";
 		
 	public static final String PATTERN_ACTIVATE 	= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) You activated the(.+) power.$";
@@ -37,7 +37,7 @@ public class CombatDefs {
 	public static final String PATTERN_DEFEATS_SELF = "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) You have defeated (.+)";
 	public static final String PATTERN_DEFEATS_OTHER= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) (.+) has defeated (.+)";
 	
-	public static final String PATTERN_XP_INF		= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) You gain ([0-9,]+) experience and ([0-9,]+) influence.";
+	public static final String PATTERN_XP_INF		= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) You gain ([0-9,]+) experience and ([0-9,]+) inf.+";
 	public static final String PATTERN_XP_INCARN	= "^([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+) You have defeated (.+)";
 	
 	public static final String COMBAT 			= "combat_";

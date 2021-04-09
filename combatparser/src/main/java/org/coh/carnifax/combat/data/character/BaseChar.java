@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({ "name", "uuid", "startDate", "endDate", "start", "end", "duration", "combatStartDate", "combatEndDate",  "combatStart", "combatEnd", "combatDuration", 
 	"totalXp", "xpPerCombatSecond", "totalInf", "infPerCombatSecond", "damagePerCombatSecond", "data", "damage", "heal", "powers", "dps" })
 
-public class BaseChar {
+public class BaseChar implements BaseCharInterface {
 	private final static Logger logger = LogManager.getLogger( BaseChar.class );
 
 	
@@ -56,95 +56,195 @@ public class BaseChar {
 		this.defeats = new TreeMap<>();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getUuid()
+	 */
+	@Override
 	public String getUuid() {
 		return uuid;
 	}
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setUuid(java.lang.String)
+	 */
+	@Override
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getName()
+	 */
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setName(java.lang.String)
+	 */
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getData()
+	 */
+	@Override
 	public BasePowerData getData() {
 		return data;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setData(org.coh.carnifax.combat.data.powers.BasePowerData)
+	 */
+	@Override
 	public void setData(BasePowerData data) {
 		this.data = data;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getDamage()
+	 */
+	@Override
 	public PowerSummary getDamage() {
 		return damage;
 	}
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getHeal()
+	 */
+	@Override
 	public PowerSummary getHeal() {
 		return heal;
 	}
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getDps()
+	 */
+	@Override
 	public PowerSummary getDps() {
 		return dps;
 	}
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getDefeats()
+	 */
+	@Override
 	public Map<String, Integer> getDefeats(){
 		return this.defeats;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getCombatDuration()
+	 */
+	@Override
 	public long getCombatDuration() {
 		return combatDuration;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setCombatDuration(long)
+	 */
+	@Override
 	public void setCombatDuration(long combatDuration) {
 		this.combatDuration = combatDuration;
 	}
 	
 	
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getStart()
+	 */
+	@Override
 	public Timestamp getStart() {
 		return start;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setStart(java.sql.Timestamp)
+	 */
+	@Override
 	public void setStart(Timestamp start) {
 		this.start = start;
 	}
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setStart(long)
+	 */
+	@Override
 	public void setStart(long start) {
 		this.start = new Timestamp(start);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getEnd()
+	 */
+	@Override
 	public Timestamp getEnd() {
 		return end;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setEnd(java.sql.Timestamp)
+	 */
+	@Override
 	public void setEnd(Timestamp end) {
 		this.end = end;
 	}
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setEnd(long)
+	 */
+	@Override
 	public void setEnd(long end) {
 		this.end = new Timestamp(end);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getCombatStart()
+	 */
+	@Override
 	public Timestamp getCombatStart() {
 		return combatStart;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setCombatStart(java.sql.Timestamp)
+	 */
+	@Override
 	public void setCombatStart(Timestamp combatStartDate) {
 		this.combatStart = combatStartDate;
 	}
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setCombatStart(long)
+	 */
+	@Override
 	public void setCombatStart(long combatStartDate) {
 		this.combatStart = new Timestamp( combatStartDate );
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getCombatEnd()
+	 */
+	@Override
 	public Timestamp getCombatEnd() {
 		return combatEnd;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setCombatEnd(java.sql.Timestamp)
+	 */
+	@Override
 	public void setCombatEnd(Timestamp combatEndDate) {
 		this.combatEnd= combatEndDate;
 	}
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setCombatEnd(long)
+	 */
+	@Override
 	public void setCombatEnd(long combatEndDate) {
 		this.combatEnd= new Timestamp(combatEndDate);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getStartDate()
+	 */
+	@Override
 	public String getStartDate() {
 		if( this.start == null) {
 			return "";
@@ -152,6 +252,10 @@ public class BaseChar {
 		
 		return new Date( start.getTime() ).toString();
 	}
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getEndDate()
+	 */
+	@Override
 	public String getEndDate() {
 		if( this.end == null) {
 			return "";
@@ -160,6 +264,10 @@ public class BaseChar {
 		return new Date( end.getTime() ).toString();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getCombatStartDate()
+	 */
+	@Override
 	public String getCombatStartDate() {
 		if( this.combatStart == null) {
 			return "";
@@ -168,6 +276,10 @@ public class BaseChar {
 		return new Date( combatStart.getTime() ).toString();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getCombatEndDate()
+	 */
+	@Override
 	public String getCombatEndDate() {
 		if( this.combatEnd == null) {
 			return "";
@@ -177,61 +289,121 @@ public class BaseChar {
 	}
 	
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getTotalXp()
+	 */
+	@Override
 	public long getTotalXp() {
 		return totalXP;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setTotalXp(long)
+	 */
+	@Override
 	public void setTotalXp(long totalXP) {
 		this.totalXP = totalXP;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getTotalInf()
+	 */
+	@Override
 	public long getTotalInf() {
 		return totalInf;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getXpPerCombatSecond()
+	 */
+	@Override
 	public long getXpPerCombatSecond() {
 		return this.totalXP / combatDuration;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getInfPerCombatSecond()
+	 */
+	@Override
 	public long getInfPerCombatSecond() {
 		return this.totalInf / combatDuration;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getDamagePerCombatSecond()
+	 */
+	@Override
 	public long getDamagePerCombatSecond() {
 		return (long)this.data.getDamageTotal() / combatDuration;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setTotalInf(long)
+	 */
+	@Override
 	public void setTotalInf(long totalInf) {
 		this.totalInf = totalInf;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#addXp(java.sql.Timestamp, long)
+	 */
+	@Override
 	public void addXp( Timestamp t, long xp ) {
 		this.totalXP = totalXP + xp;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#addInf(java.sql.Timestamp, long)
+	 */
+	@Override
 	public void addInf( Timestamp t, long inf ) {
 		this.totalInf = totalInf + inf;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getPowers()
+	 */
+	@Override
 	public Map<String, BasePower> getPowers() {
 		return powers;
 	}
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setPowers(java.util.Map)
+	 */
+	@Override
 	public void setPowers(Map<String, BasePower> powers) {
 		this.powers = powers;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getDuration()
+	 */
+	@Override
 	public long getDuration() {
 		return duration;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setDuration(long)
+	 */
+	@Override
 	public void setDuration(long duration) {
 		this.duration = duration;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#updateDuration()
+	 */
+	@Override
 	public void updateDuration() {
 		duration = ( end.getTime() - start.getTime() ) / 1000; 
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getPower(java.sql.Timestamp, java.lang.String)
+	 */
+	@Override
 	public BasePower getPower( Timestamp t, String name ) {
 		if( this.start == null ) {
 			this.start = t;
@@ -249,6 +421,10 @@ public class BaseChar {
 		
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#addDefeat(java.lang.String, java.lang.String)
+	 */
+	@Override
 	public void addDefeat( String name, String target ) {
 		int count = 0;
 		if( this.defeats.containsKey(name) ) {
@@ -259,6 +435,10 @@ public class BaseChar {
 		this.defeats.put( name, (count+1) );
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#generateSummaries()
+	 */
+	@Override
 	public void generateSummaries() {
 		
 		this.damage = new PowerSummaryImpl();

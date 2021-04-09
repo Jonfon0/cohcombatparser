@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.coh.carnifax.combat.data.CombatDefs;
 import org.coh.carnifax.combat.data.character.BaseChar;
+import org.coh.carnifax.combat.data.character.BaseCharInterface;
 import org.coh.carnifax.combat.data.character.BaseCharMixIn;
 import org.coh.carnifax.combat.data.character.summary.DamagePowerSummary;
 import org.coh.carnifax.combat.data.character.summary.DamagePowerSummaryMixIn;
@@ -25,7 +26,7 @@ public class BaseCharOutput {
 		// TODO Auto-generated constructor stub
 	}
 
-	public File output( File parentDir, BaseChar c ) throws FileParseException {
+	public File output( File parentDir, BaseCharInterface c ) throws FileParseException {
 		
 		String name = (CombatDefs.SUMMARY + c.getStart().toString() + "_" + c.getName() + ".json").replaceAll( "[^a-zA-Z0-9._ -]", "_");
 		

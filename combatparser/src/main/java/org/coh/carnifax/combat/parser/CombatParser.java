@@ -16,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.coh.carnifax.combat.data.CombatDefs;
 import org.coh.carnifax.combat.data.character.BaseChar;
+import org.coh.carnifax.combat.data.character.BaseCharInterface;
 import org.coh.carnifax.combat.data.powers.BasePower;
 import org.coh.carnifax.combat.data.powers.PowerInstance;
 import org.coh.carnifax.combat.main.FilesMain;
@@ -47,7 +48,7 @@ public class CombatParser {
 	
 	private SimpleDateFormat df;
 	
-	private BaseChar ch;
+	private BaseCharInterface ch;
 
 		
 	public CombatParser() {
@@ -74,7 +75,7 @@ public class CombatParser {
 		
 	}
 	
-	public BaseChar parse( String uuid, File parentDir, File combat ) throws CombatParseException {
+	public BaseCharInterface parse( String uuid, File parentDir, File combat ) throws CombatParseException {
 		
 		if( !combat.exists() ) {
 			throw new CombatParseException("Could not open combat file " + combat.getAbsolutePath() );
@@ -113,11 +114,11 @@ public class CombatParser {
 		
 	}
 	
-	private BaseChar createBaseChar(String uuid, String name) {
+	private BaseCharInterface createBaseChar(String uuid, String name) {
 		
 		String parts[] = name.replace(".txt", "").split("_");
 		
-		BaseChar ch = new BaseChar(uuid);
+		BaseCharInterface ch = new BaseChar(uuid);
 		ch.setStart( Long.parseLong(parts[1]) );
 
 		ch.setName(parts[ parts.length-1 ]);

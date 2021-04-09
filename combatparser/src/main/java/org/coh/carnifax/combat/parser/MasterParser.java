@@ -3,7 +3,7 @@ package org.coh.carnifax.combat.parser;
 import java.io.File;
 import java.util.UUID;
 
-import org.coh.carnifax.combat.data.character.BaseChar;
+import org.coh.carnifax.combat.data.character.BaseCharInterface;
 import org.coh.carnifax.combat.files.BaseCharOutput;
 import org.coh.carnifax.combat.files.FileDescriptor;
 import org.coh.carnifax.combat.files.FileParseException;
@@ -58,9 +58,9 @@ public class MasterParser {
 	 * @throws FileParseException
 	 * @throws CombatParseException
 	 */
-	public BaseChar parseCombatSession(String uuid, File f) throws FileParseException, CombatParseException {
+	public BaseCharInterface parseCombatSession(String uuid, File f) throws FileParseException, CombatParseException {
 		CombatParser cp = new CombatParser();
-		BaseChar cha = cp.parse( uuid, f.getParentFile(), f );
+		BaseCharInterface cha = cp.parse( uuid, f.getParentFile(), f );
 		BaseCharOutput bco = new BaseCharOutput();
 		
 		bco.output( f.getParentFile(), cha );
