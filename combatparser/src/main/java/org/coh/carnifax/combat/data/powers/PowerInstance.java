@@ -5,11 +5,11 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PowerInstance {
 	
-	private Timestamp timestamp;
+	private Timestamp timeMillis;
 	
 	private BasePowerData data;
 	
@@ -60,15 +60,16 @@ public class PowerInstance {
 	}
 	
 	public Timestamp getTimeMillis() {
-		return timestamp;
+		return timeMillis;
 	}
 	
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	public String getDate() {
-		return new Date( timestamp.getTime() ).toString();
+		return new Date( timeMillis.getTime() ).toString();
 	}
 
-	public void setTimestamp(Timestamp timestamp) {
-		this.timestamp = timestamp;
+	public void setTimeMillis(Timestamp timestamp) {
+		this.timeMillis = timestamp;
 	}
 
 	public Map<String, Double> getDamageTypes() {

@@ -7,11 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.coh.carnifax.combat.data.IsHidable;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-public class BasePower extends IsHidable {
+public class BasePower  {
 
 	private String name;
 	private Timestamp timestamp;
@@ -19,6 +18,7 @@ public class BasePower extends IsHidable {
 	private BasePowerData data;
 	
 	private Map<String, BasePower> subPowers;
+	
 	private List<PowerInstance>	instances;
 	
 	public BasePower() {
@@ -52,6 +52,8 @@ public class BasePower extends IsHidable {
 	public void setSubPowers(Map<String, BasePower> subPowers) {
 		this.subPowers = subPowers;
 	}
+
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	public BasePower getSubPower( Timestamp t, String name ) {
 		if( !this.subPowers.containsKey( name ) ) {
 			BasePower p = new BasePower();
@@ -66,6 +68,9 @@ public class BasePower extends IsHidable {
 	public List<PowerInstance> getInstances() {
 		return instances;
 	}
+	public void setInstances(List<PowerInstance> instances) {
+		this.instances = instances;
+	}
 
 	public void addInstance( PowerInstance i ) {
 		this.instances.add(i);
@@ -73,11 +78,10 @@ public class BasePower extends IsHidable {
 	
 	public void addNewInstance( Timestamp t ) {
 		PowerInstance p = new PowerInstance();
-		p.setTimestamp( t );
+		p.setTimeMillis( t );
 
 		this.instances.add( p );
 	}
-	
 	public PowerInstance getLastInstance( Timestamp t ) {
 		PowerInstance p = null; 
 		
@@ -85,9 +89,9 @@ public class BasePower extends IsHidable {
 			p = this.instances.get( this.instances.size()-1 );
 		}
 		
-		if( p == null ) {
+		if( p == null || t.getTime() - p.getTimeMillis().getTime() > 4000 ) {
 			p = new PowerInstance();
-			p.setTimestamp( t );
+			p.setTimeMillis( t );
 			this.instances.add( p );
 		}
 		
@@ -98,14 +102,11 @@ public class BasePower extends IsHidable {
 		this.data.setMisses(misses);
 	}
 	
-	public void setInstances(List<PowerInstance> instances) {
-		this.instances = instances;
-	}
-
-	public Timestamp getTimeMillis() {
+	public Timestamp getTimestamp() {
 		return timestamp;
 	}
 	
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	public String getDate() {
 		return new Date( timestamp.getTime() ).toString();
 	}

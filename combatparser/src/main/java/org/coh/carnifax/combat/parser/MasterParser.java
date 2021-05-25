@@ -25,7 +25,7 @@ public class MasterParser {
 		FileDescriptor d = p.parse(f, uuid );
 		
 		for( File combat : d.getCombat().values() ) {
-			parseCombatSession( uuid, combat );
+			parseCombatSession( uuid, combat, new String[0] );
 		}
 		
 		d.destroy();
@@ -58,10 +58,13 @@ public class MasterParser {
 	 * @throws FileParseException
 	 * @throws CombatParseException
 	 */
-	public BaseCharInterface parseCombatSession(String uuid, File f) throws FileParseException, CombatParseException {
+	public BaseCharInterface parseCombatSession(String uuid, File f, String markers[] ) throws FileParseException, CombatParseException {
 		CombatParser cp = new CombatParser();
-		BaseCharInterface cha = cp.parse( uuid, f.getParentFile(), f );
+		BaseCharInterface cha = cp.parse( uuid, f.getParentFile(), f, markers );
 		BaseCharOutput bco = new BaseCharOutput();
+		
+		bco.setConcise( false );
+		bco.setDps( true ); 
 		
 		bco.output( f.getParentFile(), cha );
 		

@@ -38,6 +38,7 @@ public class CombatParser {
 	private Pattern pseudoDamageOverTime;
 	private Pattern pseudoDamage;
 	private Pattern damageProc;
+	private Pattern critical;
 	private Pattern healOverTime;
 	private Pattern heal;
 	private Pattern pseudoHeal;
@@ -45,6 +46,20 @@ public class CombatParser {
 	private Pattern defeatsOther;
 	private Pattern date;
 	private Pattern xpInf;
+	private Pattern knockback;
+	private Pattern pseudoKnockback;
+	private Pattern hold;
+	private Pattern pseudoHold;
+	private Pattern drop;
+	
+	private Pattern defHit;
+	private Pattern defMiss;
+	private Pattern defDamage;
+	private Pattern defDamageOverTime;
+	
+	
+	private String markers[];
+	
 	
 	private SimpleDateFormat df;
 	
@@ -62,6 +77,7 @@ public class CombatParser {
 		damage = Pattern.compile( CombatDefs.PATTERN_DAMAGE );
 		damageOverTime = Pattern.compile( CombatDefs.PATTERN_DAMAGE_OVER_TIME );
 		damageProc = Pattern.compile( CombatDefs.PATTERN_DAM_PROC );
+		critical = Pattern.compile( CombatDefs.PATTERN_DAM_CRIT );
 		pseudoDamage = Pattern.compile( CombatDefs.PATTERN_PSEUDODAM );
 		pseudoDamageOverTime = Pattern.compile( CombatDefs.PATTERN_PSEUDODAMAGE_OVER_TIME );
 		healOverTime = Pattern.compile( CombatDefs.PATTERN_HEAL_OVER_TIME );
@@ -70,17 +86,33 @@ public class CombatParser {
 		defeatsSelf = Pattern.compile(CombatDefs.PATTERN_DEFEATS_SELF);
 		defeatsOther = Pattern.compile(CombatDefs.PATTERN_DEFEATS_OTHER);
 		xpInf = Pattern.compile( CombatDefs.PATTERN_XP_INF );
+		knockback = Pattern.compile( CombatDefs.PATTERN_KNOCK );
+		pseudoKnockback = Pattern.compile( CombatDefs.PATTERN_PSEUDOKNOCK );
+		hold = Pattern.compile( CombatDefs.PATTERN_HOLD );
+		pseudoHold = Pattern.compile( CombatDefs.PATTERN_PSEUDOHOLD );
+		drop = Pattern.compile( CombatDefs.PATTERN_DROPS );
+	
+		defHit = Pattern.compile( CombatDefs.PATTERN_HIT_YOU );
+		defMiss= Pattern.compile( CombatDefs.PATTERN_MISS_YOU );
+		defDamage = Pattern.compile( CombatDefs.PATTERN_DAMAGE_YOU );
+		defDamageOverTime = Pattern.compile( CombatDefs.PATTERN_DAMAGE_OVER_TIME_YOU );
+	
 		
 		df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		
+		markers = new String[0];
+		
 	}
 	
-	public BaseCharInterface parse( String uuid, File parentDir, File combat ) throws CombatParseException {
+	public BaseCharInterface parse( String uuid, File parentDir, File combat, String markers[] ) throws CombatParseException {
 		
 		if( !combat.exists() ) {
 			throw new CombatParseException("Could not open combat file " + combat.getAbsolutePath() );
 		}
-		
+		this.markers = markers;
+		if( this.markers == null ) {
+			markers = new String[0];
+		}
 		
 		this.ch = this.createBaseChar( uuid, combat.getName() );
 
@@ -137,6 +169,7 @@ public class CombatParser {
 			Matcher damM 		= this.damage.matcher( line );
 			Matcher damOverTimeM= this.damageOverTime.matcher( line );
 			Matcher damProcM	= this.damageProc.matcher( line );
+			Matcher critM		= this.critical.matcher( line );
 			Matcher pseudoDamM 	= this.pseudoDamage.matcher( line );
 			Matcher pseudoDamageOverTimeM
 								= this.pseudoDamageOverTime.matcher( line );
@@ -147,6 +180,20 @@ public class CombatParser {
 			Matcher defeatSelfM	= this.defeatsSelf.matcher( line );
 			Matcher defeatOtherM= this.defeatsOther.matcher( line );
 			Matcher xpInfM		= this.xpInf.matcher( line ); 
+			Matcher knockM		= this.knockback.matcher( line );
+			Matcher pseudoknockM		
+								= this.pseudoKnockback.matcher( line );
+			Matcher holdM		= this.hold.matcher( line );
+			Matcher pseudoHoldM	= this.pseudoHold.matcher( line );
+			
+			Matcher dropM		= this.drop.matcher( line );
+			
+			Matcher defHitM 	= this.defHit.matcher( line );
+			Matcher defMissM	= this.defMiss.matcher( line );
+			
+			Matcher defDamageM 	= this.defDamage.matcher( line );
+			Matcher defDamageOverTimeM	= this.defDamageOverTime.matcher( line );
+			
 			
 			Timestamp t 	= null;
 			
@@ -154,7 +201,13 @@ public class CombatParser {
 				t = this.parseDamageOverTime(damOverTimeM, damProcM);
 			}
 			if( damM.matches() ) {
-				t = this.parseDamage(damM, damProcM);
+				t = this.parseDamage(damM, damProcM, critM );
+			}
+			else if( defDamageOverTimeM.matches() ) {
+				t = this.parseDefDamageOverTime( defDamageOverTimeM );
+			}
+			else if( defDamageM.matches() ) {
+				t = this.parseDefDamage(defDamageM, critM );
 			}
 			else if( pseudoDamM.matches() ) {
 				t = this.parsePseudoDamage( pseudoDamM );
@@ -165,6 +218,9 @@ public class CombatParser {
 			else if( hitM.matches() ) {
 				t = this.parseHit( hitM );
 			}
+			else if( defHitM.matches() ) {
+				t = this.parseDefHit( defHitM );
+			}
 			else if( pseudoHitM.matches() ) {
 				t = this.parsePseudoHit( pseudoHitM );
 			}
@@ -174,6 +230,9 @@ public class CombatParser {
 			}
 			else if( missM.matches() ) {
 				t = this.parseMiss( missM );
+			}
+			else if( defMissM.matches() ) {
+				t = this.parseDefMiss( defMissM );
 			}
 			else if( pseudoMissM.matches() ) {
 				t = this.parsePseudoMiss( pseudoMissM );
@@ -199,15 +258,34 @@ public class CombatParser {
 			else if( xpInfM.matches() ) {
 				t = this.parseXpInf( xpInfM );
 			}
-			
+			else if( knockM.matches() ) {
+				t = this.parseKnockback( knockM );
+			}
+			else if( pseudoknockM.matches() ) {
+				t = this.parsePseudoKnockback( pseudoknockM );
+			}
+			else if( holdM.matches() ) {
+				t = this.parseHold( holdM );
+			}
+			else if( pseudoHoldM.matches() ) {
+				t = this.parsePseudoHold( pseudoHoldM );
+			}
+			else if( dropM.matches() ) {
+				t = this.parseDrop( dropM );
+			}
 			
 			if( t!=null ) {
 				ch.setEnd( t );
+				
+				for(String m : this.markers) {
+					if( line.toLowerCase().contains(m.toLowerCase()) ) {
+						ch.addMarker( m, t );
+					}
+				}
 			}
 			
 		} catch (NumberFormatException | IllegalStateException e) {
 			System.out.println("Error on " + count + " : " + line);
-			
 			throw e;
 		}
 		
@@ -215,6 +293,99 @@ public class CombatParser {
 	}
 
 	// These really are Events, be nice to have an Event Handler for this stuff. Oh well. 
+
+	private Timestamp parseHold( Matcher holdM ) throws ParseException {
+		
+		Timestamp t 	= this.parseTime( holdM.group(1).trim() );
+		String type 	= holdM.group(2).trim();
+		String enemy 	= holdM.group(3).trim();
+		String power 	= holdM.group(4).trim(); 
+		
+		BasePower p 	= ch.getOffensivePower( t, power );
+		
+		PowerInstance i = null; 
+		i = p.getLastInstance( t );
+		
+		p.getData().addMez( type );
+		i.getData().addMez( type );
+		ch.getOffensive().getData().addMez( type );
+		
+		BasePower e		= ch.getOffensiveTarget(t, enemy );
+		e.getData().addMez(type);
+		
+		return t;
+	}
+	
+	private Timestamp parsePseudoHold( Matcher holdM ) throws ParseException {
+		
+		Timestamp t 	= this.parseTime( holdM.group(1).trim() );
+		String power 	= holdM.group(2).trim(); 
+		String type 	= holdM.group(3).trim();
+		String enemy 	= holdM.group(4).trim();
+		String subPower = holdM.group(5).trim(); 
+		
+		BasePower p 	= ch.getOffensivePower( t, power );
+		
+		PowerInstance i = null; 
+		i = p.getLastInstance( t );
+		BasePower sub	= p.getSubPower( t, subPower );
+		
+		p.getData().addMez( type );
+		i.getData().addMez( type );
+		ch.getOffensive().getData().addMez( type );
+		sub.getData().addMez( type );
+
+		BasePower e		= ch.getOffensiveTarget(t, enemy );
+		e.getData().addMez(type);
+		
+		return t;
+	}
+
+	
+	private Timestamp parseKnockback( Matcher knockM ) throws ParseException {
+		
+		Timestamp t 	= this.parseTime( knockM.group(1).trim() );
+		String enemy 	= knockM.group(2).trim();
+		String power 	= knockM.group(3).trim(); 
+		
+		BasePower p 	= ch.getOffensivePower( t, power );
+		
+		PowerInstance i = null; 
+		i = p.getLastInstance( t );
+		
+		p.getData().addMez("Knock");
+		i.getData().addMez("Knock");
+		ch.getOffensive().getData().addMez("Knock");
+		
+		BasePower e		= ch.getOffensiveTarget(t, enemy );
+		e.getData().addMez("Knock");
+		
+		return t;
+	}
+	
+	private Timestamp parsePseudoKnockback( Matcher knockM ) throws ParseException {
+		
+		Timestamp t 	= this.parseTime( knockM.group(1).trim() );
+		String power 	= knockM.group(2).trim(); 
+		String enemy 	= knockM.group(3).trim();
+		String subPower = knockM.group(4).trim(); 
+		
+		BasePower p 	= ch.getOffensivePower( t, power );
+		
+		PowerInstance i = null; 
+		i = p.getLastInstance( t );
+		BasePower sub	= p.getSubPower( t, subPower );
+		
+		p.getData().addMez("Knock");
+		i.getData().addMez("Knock");
+		ch.getOffensive().getData().addMez("Knock");
+		sub.getData().addMez("Knock");
+
+		BasePower e		= ch.getOffensiveTarget(t, enemy );
+		e.getData().addMez("Knock");
+		
+		return t;
+	}
 	
 	private Timestamp parseXpInf(Matcher xpInfM) throws ParseException {
 		Timestamp t 	= this.parseTime( xpInfM.group(1).trim() );
@@ -223,6 +394,18 @@ public class CombatParser {
 		
 		ch.addXp( t, xp );
 		ch.addInf( t, inf );
+		
+		ch.getDrops().addXp(xp);
+		ch.getDrops().addInf(inf);
+		
+		return t;
+	}
+
+	private Timestamp parseDrop(Matcher dropM) throws ParseException {
+		Timestamp t 	= this.parseTime( dropM.group(1).trim() );
+		String name		= dropM.group(2).trim();
+		
+		ch.addDrop( name );
 		
 		return t;
 	}
@@ -253,15 +436,19 @@ public class CombatParser {
 		
 		double healV	= Double.parseDouble( healM.group(4).trim().replace(",", "")  );
 		
-		BasePower p 	= ch.getPower( t, power );
+		BasePower p 	= ch.getOffensivePower( t, power );
 		PowerInstance i = p.getLastInstance(t);
 		
 		p.getData().addHeal(healV);
 		i.getData().addHeal(healV);
-		ch.getData().addHeal(healV);
+		ch.getOffensive().getData().addHeal(healV);
+
+		BasePower e		= ch.getOffensiveTarget(t, target );
+		e.getData().addHeal( healV );
 		
 		return t;
 	}
+	
 
 	private Timestamp parsePseudoHeal(Matcher pseudoHealM) throws ParseException {
 		Timestamp t 	= this.parseTime( pseudoHealM.group(1).trim() );
@@ -270,12 +457,15 @@ public class CombatParser {
 		
 		double healV	= Double.parseDouble( pseudoHealM.group(4).trim().replace(",", "")  );
 		
-		BasePower p 	= ch.getPower( t, power );
+		BasePower p 	= ch.getOffensivePower( t, power );
 		PowerInstance i = p.getLastInstance(t);
 		
 		p.getData().addHeal(healV);
 		i.getData().addHeal(healV);
-		ch.getData().addHeal(healV);
+		ch.getOffensive().getData().addHeal(healV);
+
+		BasePower e		= ch.getOffensiveTarget(t, target );
+		e.getData().addHeal( healV );
 		
 		return t;
 	}
@@ -285,13 +475,13 @@ public class CombatParser {
 		String power 	= healOverTimeM.group(2).trim(); 
 		double healV	= Double.parseDouble( healOverTimeM.group(3).trim().replace(",", "")  );
 		
-		BasePower p 	= ch.getPower( t, power );
+		BasePower p 	= ch.getOffensivePower( t, power );
 		PowerInstance i = p.getLastInstance(t);
 		
 		p.getData().addHeal(healV);
 		i.getData().addHeal(healV);
-		ch.getData().addHeal(healV);
-		
+		ch.getOffensive().getData().addHeal(healV);
+
 		return t;
 	}
 
@@ -299,8 +489,10 @@ public class CombatParser {
 		Timestamp t 	= this.parseTime( actM.group(1).trim() );
 		String power 	= actM.group(2).trim(); 
 		
-		BasePower p = ch.getPower( t, power );
+		BasePower p = ch.getOffensivePower( t, power );
 		p.addNewInstance(t);
+		
+		
 		
 		return t;
 	}
@@ -313,7 +505,7 @@ public class CombatParser {
 		double chance	= Double.parseDouble( missM.group(4).trim() );
 		double roll		= Double.parseDouble( missM.group(5).trim() );
 		
-		BasePower p = ch.getPower( t, power );
+		BasePower p = ch.getOffensivePower( t, power );
 		PowerInstance i = p.getLastInstance(t);
 		
 		i.setDidHit( false );
@@ -321,8 +513,11 @@ public class CombatParser {
 		i.setToHitRoll( roll );
 		i.getData().addMiss();
 
-		ch.getData().addMiss();
+		ch.getOffensive().getData().addMiss();
 		p.getData().addMiss();
+
+		BasePower e		= ch.getOffensiveTarget(t, enemy );
+		e.getData().addMiss();
 		
 		return t;
 	}
@@ -337,8 +532,8 @@ public class CombatParser {
 		double chance	= Double.parseDouble( missM.group(5).trim() );
 		double roll		= Double.parseDouble( missM.group(6).trim() );
 		
-		BasePower p = ch.getPower( t, power );
-		BasePower sub	= p.getSubPower( t, power );
+		BasePower p = ch.getOffensivePower( t, power );
+		BasePower sub	= p.getSubPower( t, subPower );
 		
 		sub.addNewInstance(t);
 		PowerInstance i = p.getLastInstance(t);
@@ -348,9 +543,12 @@ public class CombatParser {
 		i.setToHitRoll( roll );
 		i.getData().addMiss();
 
-		ch.getData().addMiss();
+		ch.getOffensive().getData().addMiss();
 		p.getData().addMiss();
 		sub.getData().addMiss();
+		
+		BasePower e		= ch.getOffensiveTarget(t, enemy );
+		e.getData().addMiss( );
 		
 		return t;
 	}
@@ -363,7 +561,7 @@ public class CombatParser {
 		double chance	= Double.parseDouble( hitM.group(5) );
 		double roll		= Double.parseDouble( hitM.group(6) );
 		
-		BasePower p 	= ch.getPower( t, power );
+		BasePower p 	= ch.getOffensivePower( t, power );
 		BasePower sub	= p.getSubPower( t, subPower );
 		
 		sub.addNewInstance(t);
@@ -376,9 +574,12 @@ public class CombatParser {
 		i.setToHitRoll( roll );
 		i.getData().addHit();
 		
-		ch.getData().addHit();
+		ch.getOffensive().getData().addHit();
 		p.getData().addHit();
 		sub.getData().addHit();
+
+		BasePower e		= ch.getOffensiveTarget(t, enemy );
+		e.getData().addHit( );
 		
 		return t;
 	}
@@ -391,7 +592,7 @@ public class CombatParser {
 		double chance	= 100;
 		double roll		= 0;
 		
-		BasePower p 	= ch.getPower( t, power );
+		BasePower p 	= ch.getOffensivePower( t, power );
 		PowerInstance i = p.getLastInstance(t);
 		
 		i.setDidHit( true );
@@ -399,13 +600,16 @@ public class CombatParser {
 		i.setToHitRoll( roll );
 		i.getData().addHit();
 		
-		ch.getData().addHit();
+		ch.getOffensive().getData().addHit();
 		p.getData().addHit();
 		
+		BasePower e		= ch.getOffensiveTarget(t, enemy );
+		e.getData().addHit( );
+
 		return t;
 	}
 
-	private Timestamp parseDamage( Matcher damM, Matcher damProcM ) throws ParseException {
+	private Timestamp parseDamage( Matcher damM, Matcher damProcM, Matcher critical ) throws ParseException {
 		
 		Timestamp t 	= this.parseTime( damM.group(1).trim() );
 		String enemy 	= damM.group(2).trim();
@@ -414,14 +618,18 @@ public class CombatParser {
 		double damage	= Double.parseDouble( damM.group(4).trim().replace(",", "")  );
 		String type		= damM.group(5).trim();
 		
-		BasePower p 	= ch.getPower( t, power );
+		BasePower p 	= ch.getOffensivePower( t, power );
+
+		BasePower e		= ch.getOffensiveTarget(t, enemy );
+		
+		logger.debug("Dam " + power + " : " + damage );
 		
 		PowerInstance i = null; 
 		if( damProcM.matches()) {
 			i = new PowerInstance();
 			i.setDidHit(true);
 			i.getData().addHit();
-			i.setTimestamp(t);
+			i.setTimeMillis(t);
 			
 			p.addInstance(i);
 			p.getData().addHit();
@@ -431,7 +639,17 @@ public class CombatParser {
 		
 		p.getData().addDamage(type, damage);
 		i.getData().addDamage(type, damage);
-		ch.getData().addDamage( type, damage );
+		e.getData().addDamage(type, damage);
+		
+		ch.getOffensive().getData().addDamage( type, damage );
+		
+		if( critical.matches() ) {
+			p.getData().addCrit();
+			i.getData().addCrit();
+			e.getData().addCrit();
+
+			ch.getOffensive().getData().addCrit();
+		}
 		
 		return t;
 	}
@@ -445,28 +663,110 @@ public class CombatParser {
 		double damage	= Double.parseDouble( damOverTimeM.group(4).trim().replace(",", "")  );
 		String type		= damOverTimeM.group(5).trim();
 		
-		BasePower p 	= ch.getPower( t, power );
-		
+		BasePower p 	= ch.getOffensivePower( t, power );
 		PowerInstance i = null; 
+		BasePower e		= ch.getOffensiveTarget(t, enemy );
+		
 		if( damProcM.matches()) {
 			i = new PowerInstance();
 			i.setDidHit(true);
 			i.getData().addHit();
-			i.setTimestamp(t);
+			i.setTimeMillis(t);
 			
 			p.addInstance(i);
 			p.getData().addHit();
+			
+			e.getData().addHit();
 		}
 		
 		i = p.getLastInstance(t);
 		
 		p.getData().addDamageOverTime(type, damage);
 		i.getData().addDamageOverTime(type, damage);
-		ch.getData().addDamageOverTime( type, damage );
+		e.getData().addDamageOverTime(type, damage);
+		
+		ch.getOffensive().getData().addDamageOverTime( type, damage );
+		
+		return t;
+	}
+
+	private Timestamp parseDefDamage( Matcher damM, Matcher critical ) throws ParseException {
+		
+		Timestamp t 	= this.parseTime( damM.group(1).trim() );
+		String enemy 	= damM.group(2).trim();
+		String power 	= damM.group(3).trim(); 
+		
+		double damage	= Double.parseDouble( damM.group(4).trim().replace(",", "")  );
+		String type		= damM.group(5).trim();
+		
+		BasePower p 	= ch.getDefensivePower( t, power );
+		PowerInstance i = p.getLastInstance(t);
+		BasePower e 	= ch.getDefensiveTarget( t, enemy );
+		
+		if( i == null ) {
+			i = new PowerInstance();
+			i.setDidHit(true);
+			i.getData().addHit();
+			i.setTimeMillis(t);
+			
+			p.addInstance(i);
+			p.getData().addHit();
+			i = p.getLastInstance(t);
+			
+			e.getData().addHit();
+		}
+		
+		p.getData().addDamage(type, damage);
+		i.getData().addDamage(type, damage);
+		e.getData().addDamage(type, damage);
+		
+		ch.getDefensive().getData().addDamage( type, damage );
+		
+		if( critical.matches() ) {
+			p.getData().addCrit();
+			i.getData().addCrit();
+			e.getData().addCrit();
+			ch.getDefensive().getData().addCrit();
+		}
 		
 		return t;
 	}
 	
+	private Timestamp parseDefDamageOverTime( Matcher damOverTimeM ) throws ParseException {
+		
+		Timestamp t 	= this.parseTime( damOverTimeM.group(1).trim() );
+		String enemy 	= damOverTimeM.group(2).trim();
+		String power 	= damOverTimeM.group(3).trim(); 
+		
+		double damage	= Double.parseDouble( damOverTimeM.group(4).trim().replace(",", "")  );
+		String type		= damOverTimeM.group(5).trim();
+		
+		BasePower p 	= ch.getDefensivePower( t, power );
+		PowerInstance i = p.getLastInstance(t);
+		BasePower e 	= ch.getDefensiveTarget( t, enemy );
+		
+		if( i == null ) {
+			i = new PowerInstance();
+			i.setDidHit(true);
+			i.getData().addHit();
+			i.setTimeMillis(t);
+			
+			p.addInstance(i);
+			p.getData().addHit();
+			i = p.getLastInstance(t);
+			
+			e.getData().addHit();
+		}
+		
+		p.getData().addDamageOverTime(type, damage);
+		i.getData().addDamageOverTime(type, damage);
+		e.getData().addDamageOverTime(type, damage);
+		
+		ch.getDefensive().getData().addDamageOverTime( type, damage );
+		
+		return t;
+	}
+
 	
 	private Timestamp parsePseudoDamage( Matcher pseudoDamM ) throws ParseException {
 		Timestamp t 	= this.parseTime( pseudoDamM.group(1) );
@@ -477,8 +777,9 @@ public class CombatParser {
 		double damage	= Double.parseDouble( pseudoDamM.group(5).trim().replace(",", "")  );
 		String type		= pseudoDamM.group(6).trim();
 		
-		BasePower p 	= ch.getPower( t, power );
+		BasePower p 	= ch.getOffensivePower( t, power );
 		BasePower sub	= p.getSubPower( t, subPower );
+		BasePower e 	= ch.getOffensiveTarget( t, enemy );
 		
 		sub.addNewInstance(t);
 		PowerInstance i = sub.getLastInstance(t);
@@ -488,9 +789,10 @@ public class CombatParser {
 		
 		p.getData().addDamage(type, damage);
 		i.getData().addDamage(type, damage);
+		e.getData().addDamage(type, damage);
 		sub.getData().addDamage(type, damage);
 		
-		ch.getData().addDamage( type, damage );
+		ch.getOffensive().getData().addDamage( type, damage );
 
 		return t;
 	}
@@ -504,19 +806,22 @@ public class CombatParser {
 		double damage	= Double.parseDouble( pseudoDamM.group(5).trim().replace(",", "")  );
 		String type		= pseudoDamM.group(6).trim();
 		
-		BasePower p 	= ch.getPower( t, power );
+		BasePower p 	= ch.getOffensivePower( t, power );
 		BasePower sub	= p.getSubPower( t, subPower );
 		
 		//sub.addNewInstance(t);
 		PowerInstance i = sub.getLastInstance(t);
+		BasePower e 	= ch.getOffensiveTarget( t, enemy );
 		
 		sub.getData().addHit();
 		
 		p.getData().addDamageOverTime(type, damage);
 		i.getData().addDamageOverTime(type, damage);
+		e.getData().addDamageOverTime(type, damage);
+		
 		sub.getData().addDamageOverTime(type, damage);
 		
-		ch.getData().addDamageOverTime( type, damage );
+		ch.getOffensive().getData().addDamageOverTime( type, damage );
 
 		return t;
 	}
@@ -529,7 +834,34 @@ public class CombatParser {
 		double chance	= Double.parseDouble( hitM.group(4) );
 		double roll		= Double.parseDouble( hitM.group(5) );
 		
-		BasePower p 	= ch.getPower( t, power );
+		BasePower p 	= ch.getOffensivePower( t, power );
+		PowerInstance i = p.getLastInstance(t);
+		BasePower e 	= ch.getOffensiveTarget( t, enemy );
+
+		i.setDidHit( true );
+		i.setToHit( chance );
+		i.setToHitRoll( roll );
+		i.getData().addHit();
+		
+		ch.getOffensive().getData().addHit();
+		p.getData().addHit();
+		e.getData().addHit();
+
+		return t;
+	}
+
+	private Timestamp parseDefHit( Matcher hitM ) throws ParseException {
+		Timestamp t 	= this.parseTime( hitM.group(1) );
+		String enemy 	= hitM.group(2); 
+		String power 	= hitM.group(3); 
+		
+		double chance	= Double.parseDouble( hitM.group(4) );
+		double roll		= Double.parseDouble( hitM.group(5) );
+		
+		BasePower p 	= ch.getDefensivePower( t, power );
+		BasePower e 	= ch.getDefensiveTarget( t, enemy );
+
+		p.addNewInstance(t);
 		PowerInstance i = p.getLastInstance(t);
 		
 		i.setDidHit( true );
@@ -537,8 +869,35 @@ public class CombatParser {
 		i.setToHitRoll( roll );
 		i.getData().addHit();
 		
-		ch.getData().addHit();
+		ch.getDefensive().getData().addHit();
 		p.getData().addHit();
+		e.getData().addHit();
+		
+		return t;
+	}
+
+	private Timestamp parseDefMiss( Matcher missM ) throws ParseException {
+		Timestamp t 	= this.parseTime( missM.group(1) );
+		String enemy 	= missM.group(2); 
+		String power 	= missM.group(3); 
+		
+		double chance	= Double.parseDouble( missM.group(4) );
+		double roll		= Double.parseDouble( missM.group(5) );
+		
+		BasePower p 	= ch.getDefensivePower( t, power );
+		p.addNewInstance(t);
+		PowerInstance i = p.getLastInstance(t);
+		BasePower e 	= ch.getDefensiveTarget( t, enemy );
+
+		
+		i.setDidHit( false );
+		i.setToHit( chance );
+		i.setToHitRoll( roll );
+		i.getData().addMiss();
+		
+		ch.getDefensive().getData().addMiss();
+		p.getData().addMiss();
+		e.getData().addMiss();
 
 		return t;
 	}

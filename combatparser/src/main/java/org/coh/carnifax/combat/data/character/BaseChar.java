@@ -8,27 +8,32 @@ import java.util.TreeMap;
 import org.coh.carnifax.combat.data.character.summary.PowerSummaryImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.coh.carnifax.combat.data.CombatDefs;
 import org.coh.carnifax.combat.data.character.summary.DamagePowerSummary;
+import org.coh.carnifax.combat.data.character.summary.DropData;
+import org.coh.carnifax.combat.data.character.summary.MarkerEntry;
 import org.coh.carnifax.combat.data.character.summary.PowerSummary;
 import org.coh.carnifax.combat.data.powers.BasePower;
 import org.coh.carnifax.combat.data.powers.BasePowerData;
 import org.coh.carnifax.combat.data.powers.PowerInstance;
-import org.coh.carnifax.combat.parser.CombatParser;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({ "name", "uuid", "startDate", "endDate", "start", "end", "duration", "combatStartDate", "combatEndDate",  "combatStart", "combatEnd", "combatDuration", 
-	"totalXp", "xpPerCombatSecond", "totalInf", "infPerCombatSecond", "damagePerCombatSecond", "data", "damage", "heal", "powers", "dps" })
-
+@JsonPropertyOrder({ "name", "uuid", "summary", "startDate", "endDate", "start", "end", "duration", "combatStartDate", "combatEndDate",  "combatStart", "combatEnd", "combatDuration", 
+	"totalXp", "xpPerCombatSecond", "totalInf", "infPerCombatSecond", "damagePerCombatSecond", "offensive", "defensive", "drops" })
+@JsonIgnoreProperties( allowGetters = true)
 public class BaseChar implements BaseCharInterface {
 	private final static Logger logger = LogManager.getLogger( BaseChar.class );
 
 	
 	private String uuid;
 	private String name;
+	private String summary;
 	
-	private Map<String, BasePower> powers;
 	private Map<String, Integer> defeats;
+	private DropData drops;
 	
 	private Timestamp start;
 	private Timestamp end;
@@ -41,19 +46,25 @@ public class BaseChar implements BaseCharInterface {
 	private long totalXP;
 	private long totalInf;
 	
-	private BasePowerData data;
-	private PowerSummary damage;
-	private PowerSummary heal;
-	private PowerSummary dps;
-	private PowerSummary inf;
-	private PowerSummary xp;
-	private Map<Timestamp, String> drops;
+	private Powers offensive;
+	private Powers defensive;
+
+	private Map<String, MarkerEntry> markers;
+	
+	public BaseChar( ){
+		this.uuid = "";
+		this.defeats = new TreeMap<String, Integer>();
+		this.drops = new DropData();
+		
+		this.offensive = new Powers();
+		this.defensive = new Powers();
+		
+		this.markers = new TreeMap<String, MarkerEntry>();
+	}
 	
 	public BaseChar( String uuid ){
+		this();
 		this.uuid = uuid;
-		this.powers = new TreeMap<String, BasePower>();
-		this.data   = new BasePowerData();
-		this.defeats = new TreeMap<>();
 	}
 	
 	/* (non-Javadoc)
@@ -91,39 +102,18 @@ public class BaseChar implements BaseCharInterface {
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getData()
 	 */
 	@Override
-	public BasePowerData getData() {
-		return data;
+	public Powers getOffensive() {
+		return offensive;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setData(org.coh.carnifax.combat.data.powers.BasePowerData)
 	 */
 	@Override
-	public void setData(BasePowerData data) {
-		this.data = data;
+	public void setOffensive(Powers data) {
+		this.offensive = data;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getDamage()
-	 */
-	@Override
-	public PowerSummary getDamage() {
-		return damage;
-	}
-	/* (non-Javadoc)
-	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getHeal()
-	 */
-	@Override
-	public PowerSummary getHeal() {
-		return heal;
-	}
-	/* (non-Javadoc)
-	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getDps()
-	 */
-	@Override
-	public PowerSummary getDps() {
-		return dps;
-	}
 	/* (non-Javadoc)
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getDefeats()
 	 */
@@ -245,6 +235,7 @@ public class BaseChar implements BaseCharInterface {
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getStartDate()
 	 */
 	@Override
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	public String getStartDate() {
 		if( this.start == null) {
 			return "";
@@ -256,6 +247,7 @@ public class BaseChar implements BaseCharInterface {
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getEndDate()
 	 */
 	@Override
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	public String getEndDate() {
 		if( this.end == null) {
 			return "";
@@ -268,6 +260,7 @@ public class BaseChar implements BaseCharInterface {
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getCombatStartDate()
 	 */
 	@Override
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	public String getCombatStartDate() {
 		if( this.combatStart == null) {
 			return "";
@@ -280,6 +273,7 @@ public class BaseChar implements BaseCharInterface {
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getCombatEndDate()
 	 */
 	@Override
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	public String getCombatEndDate() {
 		if( this.combatEnd == null) {
 			return "";
@@ -317,6 +311,7 @@ public class BaseChar implements BaseCharInterface {
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getXpPerCombatSecond()
 	 */
 	@Override
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	public long getXpPerCombatSecond() {
 		return this.totalXP / combatDuration;
 	}
@@ -325,6 +320,7 @@ public class BaseChar implements BaseCharInterface {
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getInfPerCombatSecond()
 	 */
 	@Override
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	public long getInfPerCombatSecond() {
 		return this.totalInf / combatDuration;
 	}
@@ -333,8 +329,9 @@ public class BaseChar implements BaseCharInterface {
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getDamagePerCombatSecond()
 	 */
 	@Override
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	public long getDamagePerCombatSecond() {
-		return (long)this.data.getDamageTotal() / combatDuration;
+		return (long)this.offensive.getData().getDamageTotal() / combatDuration;
 	}
 
 	/* (non-Javadoc)
@@ -364,17 +361,6 @@ public class BaseChar implements BaseCharInterface {
 	/* (non-Javadoc)
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getPowers()
 	 */
-	@Override
-	public Map<String, BasePower> getPowers() {
-		return powers;
-	}
-	/* (non-Javadoc)
-	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#setPowers(java.util.Map)
-	 */
-	@Override
-	public void setPowers(Map<String, BasePower> powers) {
-		this.powers = powers;
-	}
 
 	/* (non-Javadoc)
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getDuration()
@@ -404,23 +390,87 @@ public class BaseChar implements BaseCharInterface {
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getPower(java.sql.Timestamp, java.lang.String)
 	 */
 	@Override
-	public BasePower getPower( Timestamp t, String name ) {
+	public BasePower getOffensivePower( Timestamp t, String name ) {
 		if( this.start == null ) {
 			this.start = t;
 		}
 		this.end = t;
 		
-		if( !this.powers.containsKey( name ) ) {
+		if( !this.offensive.getPowers().containsKey( name ) ) {
 			BasePower p = new BasePower();
 			p.setName( name );
 			p.setTimestamp( t );
-			this.powers.put(name, p);
+			this.offensive.getPowers().put(name, p);
 		}
 		
-		return this.powers.get( name );
+		return this.offensive.getPowers().get( name );
+	}
+
+	@Override
+	public BasePower getOffensiveTarget( Timestamp t, String name ) {
+		if( this.start == null ) {
+			this.start = t;
+		}
+		this.end = t;
 		
+		if( !this.offensive.getTargets().containsKey( name ) ) {
+			BasePower p = new BasePower();
+			p.setName( name );
+			p.setTimestamp( t );
+			this.offensive.getTargets().put(name, p);
+		}
+		
+		return this.offensive.getTargets().get( name );
 	}
 	
+
+	
+	/* (non-Javadoc)
+	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#getPower(java.sql.Timestamp, java.lang.String)
+	 */
+	@Override
+	public BasePower getDefensivePower( Timestamp t, String name ) {
+		if( this.start == null ) {
+			this.start = t;
+		}
+		this.end = t;
+		
+		if( !this.defensive.getPowers().containsKey( name ) ) {
+			BasePower p = new BasePower();
+			p.setName( name );
+			p.setTimestamp( t );
+			this.defensive.getPowers().put(name, p);
+		}
+		
+		return this.defensive.getPowers().get( name );
+	}
+	
+	@Override
+	public BasePower getDefensiveTarget( Timestamp t, String name ) {
+		if( this.start == null ) {
+			this.start = t;
+		}
+		this.end = t;
+		
+		if( !this.defensive.getTargets().containsKey( name ) ) {
+			BasePower p = new BasePower();
+			p.setName( name );
+			p.setTimestamp( t );
+			this.defensive.getTargets().put(name, p);
+		}
+		
+		return this.defensive.getTargets().get( name );
+	}
+
+	
+	public Powers getDefensive() {
+		return defensive;
+	}
+
+	public void setDefensive(Powers defensive) {
+		this.defensive = defensive;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#addDefeat(java.lang.String, java.lang.String)
 	 */
@@ -435,27 +485,65 @@ public class BaseChar implements BaseCharInterface {
 		this.defeats.put( name, (count+1) );
 	}
 	
+	@Override
+	public DropData getDrops() {
+		return drops;
+	}
+
+	@Override
+	public void setDrops(DropData drops) {
+		this.drops = drops;
+	}
+
+	@Override
+	public synchronized void addDrop( String name ) {
+		this.drops.addDrop(name);
+	}
+	
+	@Override
+	public String getSummary() {
+		return summary;
+	}
+
+	@Override
+	public void setSummary(String summary) {
+		this.summary = summary;
+	}
+
+	@Override
+	public Map<String, MarkerEntry> getMarkers() {
+		return markers;
+	}
+	@Override
+	public void setMarkers(Map<String, MarkerEntry> markers) {
+		this.markers = markers;
+	}
+	@Override
+	public void addMarker( String name, Timestamp t ) {
+		if( !this.markers.containsKey(name) ) {
+			MarkerEntry e = new MarkerEntry();
+			e.setName(name);
+			this.markers.put(name, e);
+		}
+		
+		this.markers.get(name).addInstance( t.getTime() );
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.coh.carnifax.combat.data.character.BaseCharInterface#generateSummaries()
 	 */
 	@Override
 	public void generateSummaries() {
+				
+		double total;
+		generateTotals( this.offensive );
+		generateTotals( this.defensive );
 		
-		this.damage = new PowerSummaryImpl();
-		this.heal   = new PowerSummaryImpl();
-		this.dps 	= new DamagePowerSummary();
-		this.dps.setHidable(true);
-		
-		double total 		= this.data.getDamageTotal();
-		double healTotal	= this.data.getHeal();
-		
-		for( BasePower p : this.powers.values() ) {
-			damage.add(p.getName(), p.getData().getDamageTotal(), total);
-			heal.add(p.getName(), p.getData().getHeal(), healTotal );
-		}
 		
 		// DPS
 		total = 0.00;
+		double defTotal = 0;
+		
 		long counter = 0;
 		
 		logger.debug("Summary start : " + start + ". End " + end );
@@ -464,14 +552,16 @@ public class BaseChar implements BaseCharInterface {
 			end = start;
 		}
 		
-		for( long i = start.getTime() / 1000; i <= end.getTime() / 1000; i++ ) {
+		for( long i = start.getTime() / CombatDefs.INTERVAL; i <= end.getTime() / CombatDefs.INTERVAL; i++ ) {
 			counter++;
 			
 			Timestamp t = null;
-			for( BasePower p : this.powers.values() ) {
+			for( BasePower p : this.offensive.getPowers().values() ) {
+				
 				for( PowerInstance pi : p.getInstances() ) {
-					if(  pi.getTimeMillis().getTime() / 1000 == i) {
+					if(  pi.getTimeMillis().getTime() / CombatDefs.INTERVAL == i) {
 						total += pi.getData().getDamageTotal();
+						
 						if( pi.getData().getDamageTotal() != 0 ) {
 							t = pi.getTimeMillis();
 						}
@@ -480,8 +570,9 @@ public class BaseChar implements BaseCharInterface {
 				
 				for( BasePower sp : p.getSubPowers().values() ) {
 					for( PowerInstance pi : sp.getInstances() ) {
-						if(  pi.getTimeMillis().getTime() / 1000 == i) {
+						if(  pi.getTimeMillis().getTime() / CombatDefs.INTERVAL == i) {
 							total += pi.getData().getDamageTotal();
+							
 							if( pi.getData().getDamageTotal() != 0 ) {
 								t = pi.getTimeMillis();
 							}
@@ -489,23 +580,57 @@ public class BaseChar implements BaseCharInterface {
 					}
 		
 				}
+				
 			}
+			
+			this.offensive.getDps().add( "" + (i*CombatDefs.INTERVAL), total, this.offensive.getData().getDamageTotal());
 			
 			if( this.combatStart == null && t != null ) {
 				this.combatStart = t;
 			}
-			
 			if( t != null ) {
 				this.combatEnd = t;
 			}
 			
-			this.dps.add( "" + (i*1000), (total / counter), this.data.getDamageTotal());
-			
+			// Defensive
+			for( BasePower p : this.defensive.getPowers().values() ) {
+				for( PowerInstance pi : p.getInstances() ) {
+					if(  pi.getTimeMillis().getTime() / CombatDefs.INTERVAL == i) {
+						defTotal += pi.getData().getDamageTotal();
+					}
+				}
+				
+				for( BasePower sp : p.getSubPowers().values() ) {
+					for( PowerInstance pi : sp.getInstances() ) {
+						if(  pi.getTimeMillis().getTime() / CombatDefs.INTERVAL == i) {
+							defTotal += pi.getData().getDamageTotal();
+						}
+					}
+		
+				}
+			}
+			this.defensive.getDps().add( "" + (i*CombatDefs.INTERVAL), defTotal, this.defensive.getData().getDamageTotal());
 		}
+		
+		
 		if( this.combatStart != null && this.combatEnd != null ) {
+			
+			this.combatEnd = new Timestamp( ((DamagePowerSummary)(this.offensive.getDps() )).trim( combatStart.getTime(), combatEnd.getTime() ) );
+			((DamagePowerSummary)(this.defensive.getDps() )).trim( combatStart.getTime(), combatEnd.getTime() );
+
 			this.combatDuration = (this.combatEnd.getTime() - this.combatStart.getTime()) / 1000;
 		}
 		
+	}
+
+	private void generateTotals( Powers o ) {
+		double total 		= o.getData().getDamageTotal();
+		double healTotal	= o.getData().getHeal();
+		
+		for( BasePower p : o.getPowers().values() ) {
+			o.getDamage().add(p.getName(), p.getData().getDamageTotal(), total);
+			o.getHeal().add(p.getName(), p.getData().getHeal(), healTotal );
+		}
 	}
 
 	
